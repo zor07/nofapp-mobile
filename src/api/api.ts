@@ -1,16 +1,11 @@
 import axios, {AxiosRequestConfig} from "axios";
-import {
-    LevelType,
-    NotebookType,
-    NoteType,
-    PracticeType,
-    ProfileType,
-    RelapseLogType,
-    TaskType,
-    TimerDtoType,
-    UserProgressType
-} from "../shared/types";
 import AsyncStorage from "@react-native-async-storage/async-storage/lib/typescript/AsyncStorage.native";
+import {LevelType} from "../redux/levels-reducer";
+import {TaskType} from "../redux/tasks-reducer";
+import {UserProgressType} from "../redux/user-progress-reducer";
+import {ProfileType, RelapseLog} from "../redux/profile-reducer";
+import {NoteType} from "../redux/note-editor-reducer";
+import {NotebookType} from "../redux/notebook-reducer";
 
 const ApiManager = axios.create({
     baseURL: 'http://77.222.55.78:8888/api/v1/',
@@ -18,8 +13,8 @@ const ApiManager = axios.create({
     withCredentials: true
 })
 
-export const access_token: string = 'access_token'
-export const refresh_token: string = 'refresh_token'
+export const ACCESS_TOKEN: string = 'access_token'
+export const REFRESH_TOKEN: string = 'refresh_token'
 
 export default ApiManager
 
@@ -48,7 +43,7 @@ export const AUTH_API = {
     refreshAccessToken() {
         return ApiManager.get(`auth/token/refresh`, {
             headers: {
-                "Authorization": `Bearer ${AsyncStorage.getItem(refresh_token)}`
+                "Authorization": `Bearer ${AsyncStorage.getItem(REFRESH_TOKEN)}`
             }
         })
     }
@@ -124,7 +119,7 @@ export const TASKS_API = {
         formData.append('file', file)
         const config : AxiosRequestConfig = {
             headers: {
-                "Authorization": `Bearer ${AsyncStorage.getItem(access_token)}`,
+                "Authorization": `Bearer ${AsyncStorage.getItem(ACCESS_TOKEN)}`,
                 "content-type": "multipart/form-data"
             }
         }
@@ -183,7 +178,7 @@ export const PROFILE_API = {
         formData.append('file', avatar)
         const config : AxiosRequestConfig = {
             headers: {
-                "Authorization": `Bearer ${AsyncStorage.getItem(access_token)}`,
+                "Authorization": `Bearer ${AsyncStorage.getItem(ACCESS_TOKEN)}`,
                 "content-type": "multipart/form-data"
             }
         }
@@ -223,7 +218,7 @@ export const USER_POSTS_API = {
 }
 
 export const RELAPSE_LOG_API = {
-    getRelapseLogEntries(userId: string): PromiseLike<ResponseType<Array<RelapseLogType>>> {
+    getRelapseLogEntries(userId: string): PromiseLike<ResponseType<Array<RelapseLog>>> {
         return ApiManager.get(`profiles/${userId}/relapses`, auth())
             .catch((error) => {
                 return handleError(error)
@@ -250,7 +245,7 @@ export const TIMER_API = {
                 return handleError(error)
             })
     },
-    startTimer(timerData: TimerDtoType) {
+    startTimer(timerData: any) {
         return ApiManager.post(`timers`, timerData, auth())
             .catch((error) => {
                 return handleError(error)
@@ -337,49 +332,10 @@ export const NOTEBOOKS_API = {
     }
 }
 
-export const PRACTICE_API = {
-    getPractices(isPublic = false) {
-        return ApiManager.get(`practices?isPublic=${isPublic}`, auth())
-            .catch((error) => {
-                return handleError(error)
-            })
-    },
-    getPractice(practiceId: string) {
-        return ApiManager.get(`practices/${practiceId}`, auth())
-            .catch((error) => {
-                return handleError(error)
-            })
-    },
-    addPracticeToUser(practiceId: string) {
-        return ApiManager.put(`practices/${practiceId}`, null, auth())
-            .catch((error) => {
-                return handleError(error)
-            })
-    },
-    savePractice(practice: PracticeType) {
-        return ApiManager.post(`practices`, practice, auth())
-            .catch((error) => {
-                return handleError(error)
-            })
-    },
-    updatePractice(practice: PracticeType) {
-        return ApiManager.put(`practices`, practice, auth())
-            .catch((error) => {
-                return handleError(error)
-            })
-    },
-    deletePractice(practiceId: string) {
-        return ApiManager.delete(`practices/${practiceId}`, auth())
-            .catch((error) => {
-                return handleError(error)
-            })
-    },
-}
-
 export const auth = (): AxiosRequestConfig => {
     return {
         headers: {
-            "Authorization": `Bearer ${AsyncStorage.getItem(access_token)}`
+            "Authorization": `Bearer ${AsyncStorage.getItem(ACCESS_TOKEN)}`
         }
     }
 }
